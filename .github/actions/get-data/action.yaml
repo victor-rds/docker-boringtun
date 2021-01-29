@@ -1,0 +1,29 @@
+name: 'Get Data'
+description: 'Get Version, Boringtun REF and List of Tags'
+outputs:
+  version: 
+    description: "Version of the Image"
+    value: ${{ steps.get_data.outputs.version }}
+  tags: 
+    description: "List of Tags"
+    value: ${{ steps.get_data.outputs.tags }}
+runs:
+  using: "composite"
+  steps: 
+    - id: get_data
+      env:
+        BORINGTUN_IMG: victorrds/boringtun
+      shell: bash
+      run: |
+        VERSION="edge"
+        TAGS=""
+
+        TAGS="${BORINGTUN_IMG}:latest"
+
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+          TAGS="${TAGS},${BORINGTUN_IMG}:${VERSION}"
+        fi
+
+        echo ::set-output name=version::${VERSION}
+        echo ::set-output name=tags::${TAGS}
